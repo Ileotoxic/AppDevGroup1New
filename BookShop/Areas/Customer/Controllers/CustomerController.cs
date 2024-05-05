@@ -2,6 +2,7 @@
 using BookShop.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace BookShop.Areas.Customer.Controllers
@@ -10,22 +11,25 @@ namespace BookShop.Areas.Customer.Controllers
     [Authorize(Roles = "Customer")]
     public class CustomerController : Controller
     {
-
+        private readonly IWebHostEnvironment _environment;
         private readonly ApplicationDbContext _context;
 
-        public CustomerController(ApplicationDbContext context)
+        public CustomerController(IWebHostEnvironment environment, ApplicationDbContext context)
         {
+            _environment = environment;
             _context = context;
         }
 
+
+
         // GET: CustomerController
-    
+
         public IActionResult Index()
         {
             var jobListings = _context.JobListingModels.ToList();
             return View(jobListings);
         }
-       
+
         public IActionResult JobDetails(int id)
         {
             var job = _context.JobListingModels.FirstOrDefault(j => j.JobListingId == id);
@@ -35,23 +39,59 @@ namespace BookShop.Areas.Customer.Controllers
             }
             return View(job);
         }
-       
-        [HttpPost]
-        public IActionResult Apply(JobListingModel model)
+        [Authorize(Roles = "Employer,Customer")]
+        public IActionResult Apply(string JobListingId)
         {
-            if (ModelState.IsValid)
-            {
-                // Logic to handle job application submission
-                // You can access model.JobId and model.Resume here
+            ViewBag.JobListingId = JobListingId;
+            return View();
+        }
 
-                // For simplicity, assuming the submission is successful
-                return RedirectToAction("Index");
-            }
-            else
+        [HttpPost]
+        public async Task<IActionResult> Apply(ApplicationModel model)
+        {
+            var job = new ApplicationModel
             {
-                // If model validation fails, return to the JobDetails view with the model to display validation errors
-                return View("JobDetails", model);
+                JobListingId= model.JobListingId,
+                Message = model.Message,
+                Description = model.Description,
+            };
+
+            //var displayOrder = _context.ApplicationModels.Where(a => a.JobListingId == 1).Count();
+
+            await _context.AddAsync(job);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Edit(int id)
+        {
+            var job = _context.JobListingModels.FirstOrDefault(j => j.JobListingId == id);
+            if (job == null)
+            {
+                return NotFound();
             }
+            var CategoryName = _context.Categories.FirstOrDefault(c => c.CategoryId == job.CategoryId)?.Name;
+            ViewBag.CategoryName = CategoryName;
+            return View(job);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, JobListingModel model)
+        {
+            var job = await _context.JobListingModels.FindAsync(id);
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            job.Title = model.Title;
+            job.Description = model.Description;
+            job.Location = model.Location;
+            job.ApplicationDeadline = model.ApplicationDeadline;
+            job.ImagePath = model.ImagePath;
+
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
+
+
 }

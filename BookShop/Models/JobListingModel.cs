@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Http;
@@ -40,5 +41,6 @@ namespace BookShop.Models
         // Optional property to store the image path or byte array in the database
         public string? ImagePath { get; set; }
         public bool ImageUploaded { get; set; }
+
     }
 }

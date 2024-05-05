@@ -21,9 +21,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DisplayOrder)
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -34,7 +31,6 @@
                 <td>@Html.DisplayFor(modelItem => item.JobListingId)</td>
                 <td>@Html.DisplayFor(modelItem => item.Message)</td>
                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                <td>@Html.DisplayFor(modelItem => item.DisplayOrder)</td>
                 <td>
                     @if (User.IsInRole("Customer"))
                     {
@@ -46,8 +42,6 @@
                     {
                         <a asp-action="Details" asp-route-id="@item.ApplicationId">Details</a>
                         <a asp-action="Delete" asp-route-id="@item.ApplicationId">Delete</a>
- 
-                    
                     }
                 </td>
             </tr>

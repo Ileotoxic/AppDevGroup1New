@@ -17,8 +17,7 @@ namespace BookShop.Models
         // Navigation property if needed
         public string? Description { get; set; }
 
-        [DisplayName("Order of Display")]
-        [Range(1, int.MaxValue, ErrorMessage = "Display order must be a positive number.")]
-        public int DisplayOrder { get; set; }
+        public bool? status { get; set; }
+
     }
 }

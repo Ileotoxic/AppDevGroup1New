@@ -23,6 +23,7 @@ namespace BookShop.Areas.Employer.Controllers
         [Authorize(Roles = "Employer,Customer")]
         public async Task<IActionResult> Index()
         {
+            //var applications = await _context.ApplicationModels.Where(a => a.status == null).ToListAsync();
             var applications = await _context.ApplicationModels.ToListAsync();
             return View(applications);
         }
@@ -156,5 +157,25 @@ namespace BookShop.Areas.Employer.Controllers
             return _context.ApplicationModels.Any(e => e.ApplicationId == id);
         }
 
+        [Authorize(Roles = "Employer,Customer")]
+        public async Task<IActionResult> Approve(string status, int id)
+        {
+            var application =  await _context.ApplicationModels.FirstOrDefaultAsync(a => a.ApplicationId == id);
+
+            if(application != null)
+            {
+                try
+                {
+                    application.status = bool.Parse(status);
+                    _context.Update(application);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    throw new Exception();
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
